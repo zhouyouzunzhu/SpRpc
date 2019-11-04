@@ -1,0 +1,32 @@
+重要！！！至少要C++11才能编译通过
+
+1.目前服务器端不支持多线程
+2.注册的rpc函数客户端调用时必须参数类型对应，内部会有类型哈希的检查，不对应会导致调用error
+3.rpc函数的参数如果需要数组或比较复杂的类型使用Serializer，参数不能为stl，std::string std::vetcor都不行
+4.rpc函数的返回值可以用std::vetcor，但仍建议使用Serializer
+5.rpc通用函数，就算是没有注册任何函数的rpc也具有的功能
+    *：获取rpc函数列表，返回类型std::vector<String>，无参数
+    ?：获取rpc函数的帮助信息，返回类型String，参数为函数名
+6.在不改动ServerManager.h代码的情况下，服务器端拥有以下全局rpc函数
+    reload：重新扫描并加载服务器端指定文件夹下的模块（3个参数必须存在）
+        参数：
+            String：扫描路径，可以为""，为""时路径为./modules
+            String：扫描后缀，可以为""，为""时后缀为"dll"
+            bool:是否卸载目录下之前有现在扫描后却没有的模块，建议为false
+        返回：
+            String：返回重新加载后的模块统计
+
+    mods：获取当前服务器端已经加载的模块名和版本号，返回类型std::vector<String>，无参数
+
+    SendFile：通过ser发送文件到服务器端
+        发送文件不宜超过10M，因为不是多线程，文件过大会造成假死
+        参数：
+            Serializer：文件内容需要input到ser里
+            String：保存到服务器端的路径
+        返回：
+            0：失败  1：成功
+7.如果rpc.call没有指定返回类型，则默认为int返回
+8.rpc.bind注册不支持直接使用lambda进行注册，至少要经过一层std::function<...>
+9.由于代码模板编程很多，编写客户端或者dll时直接把rpcInclude文件夹里的代码放到项目里就好
+    dll端例如vs2013只需要创建一个空的dll项目，项目配置也不需要做任何改动，直接把rpcInclude放进项目里就可以了
+
